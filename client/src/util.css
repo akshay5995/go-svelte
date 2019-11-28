@@ -1,0 +1,92 @@
+@import 'tailwindcss/base';
+
+@import 'tailwindcss/components';
+
+@import 'tailwindcss/utilities';
+
+html,
+body,
+main {
+  height: 100ch;
+}
+
+.sp-bars {
+  width: 10px;
+  margin: 2rem auto;
+  height: 2rem;
+  border: 1px #000 solid;
+  background-color: #bbb;
+  -webkit-animation: spBars 1s infinite linear;
+  animation: spBars 1s infinite linear;
+}
+.sp-bars:after,
+.sp-bars:before {
+  content: '';
+  position: absolute;
+  width: inherit;
+  height: inherit;
+  border: inherit;
+  background-color: inherit;
+  top: -1px;
+}
+.sp-bars:before {
+  left: -20px;
+  -webkit-animation: spBarsBefore 1s infinite linear;
+  animation: spBarsBefore 1s infinite linear;
+}
+.sp-bars:after {
+  right: -20px;
+  -webkit-animation: spBarsAfter 1s infinite linear;
+  animation: spBarsAfter 1s infinite linear;
+}
+@keyframes spBarsBefore {
+  0% {
+    transform: scale(1, 1);
+  }
+  25% {
+    transform: scale(1, 1.25);
+  }
+  50% {
+    transform: scale(1, 0.75);
+  }
+  75% {
+    transform: scale(1, 1);
+  }
+  100% {
+    transform: scale(1, 1);
+  }
+}
+@keyframes spBars {
+  0% {
+    transform: scale(1, 1);
+  }
+  25% {
+    transform: scale(1, 1);
+  }
+  50% {
+    transform: scale(1, 1.25);
+  }
+  75% {
+    transform: scale(1, 1);
+  }
+  100% {
+    transform: scale(1, 1);
+  }
+}
+@keyframes spBarsAfter {
+  0% {
+    transform: scale(1, 1);
+  }
+  25% {
+    transform: scale(1, 1);
+  }
+  50% {
+    transform: scale(1, 0.75);
+  }
+  75% {
+    transform: scale(1, 1.25);
+  }
+  100% {
+    transform: scale(1, 1);
+  }
+}
