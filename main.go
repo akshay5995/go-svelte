@@ -21,7 +21,7 @@ import (
 	"github.com/gin-contrib/cors"
 )
 
-const github_token = "f46782677e93156562f72987229b85b5a82fef94"
+const github_token = "your-token"
 
 func initGithubClient(accessToken string) (context.Context, *github.Client) {
 	fmt.Printf("Initilizing Github Client")
