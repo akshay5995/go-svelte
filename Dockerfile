@@ -1,4 +1,4 @@
-FROM golang:1.13-buster as build
+FROM golang:latest as builder
 
 WORKDIR /go/src/app
 
@@ -10,6 +10,10 @@ RUN go build -o /go/bin/app
 
 FROM gcr.io/distroless/base
 
-COPY --from=build /go/bin/app /
+COPY --from=builder /go/src/app/client/ /client/
+
+COPY --from=builder /go/src/app/.env /
+
+COPY --from=builder /go/bin/app /
 
 CMD ["/app"]

@@ -2,26 +2,37 @@ package main
 
 import (
 	"context"
+	
+	"net/http"
+
+	"log"
+
 	"sort"
 
+	"github.com/joho/godotenv"
+
 	"github.com/gin-gonic/gin"
+
+	"github.com/rs/zerolog"
 
 	"github.com/gin-contrib/static"
 
 	"golang.org/x/oauth2"
 
+	"github.com/gin-contrib/logger"
+
 	"github.com/google/go-github/v28/github"
 
 	"fmt"
 
-	model "go-blog/models"
+	model "go-svelte/models"
 
 	"strconv"
 
+	"os"
+
 	"github.com/gin-contrib/cors"
 )
-
-const github_token = "your-token"
 
 func initGithubClient(accessToken string) (context.Context, *github.Client) {
 	fmt.Printf("Initilizing Github Client")
@@ -39,7 +50,41 @@ func initGithubClient(accessToken string) (context.Context, *github.Client) {
 }
 
 func main() {
+	err := godotenv.Load(".env")
+
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	zerolog.SetGlobalLevel(zerolog.InfoLevel)
+
+	if gin.IsDebugging() {
+		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	}
+
+	// Custom logger
+	subLog := zerolog.New(os.Stdout).With().
+		Str("foo", "bar").
+		Logger()
+
+	fmt.Printf("Check if we can connect to github")
+
+	_, connectionErr := http.Get("https://api.github.com")
+
+	if connectionErr != nil {
+		log.Fatal("Error connecting to github")
+	}
+
+	var githubToken = os.Getenv("GITHUB_TOKEN")
+
+	var githubUser = os.Getenv("GITHUB_USER")
+
 	r := gin.Default()
+
+	r.Use(logger.SetLogger(logger.Config{
+		Logger: &subLog,
+		UTC:    true,
+	}))
 
 	config := cors.DefaultConfig()
 
@@ -47,12 +92,12 @@ func main() {
 
 	r.Use(cors.New(config))
 
-	ctx, github := initGithubClient(github_token)
+	ctx, github := initGithubClient(githubToken)
 
 	r.Use(static.Serve("/", static.LocalFile("client/public", true)))
 
 	r.GET("/user", func(c *gin.Context) {
-		user, _, _ := github.Users.Get(ctx, "akshay5995")
+		user, _, _ := github.Users.Get(ctx, githubUser)
 
 		c.JSON(200, user)
 	})
