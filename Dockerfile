@@ -10,7 +10,7 @@ RUN go build -o /go/bin/app
 
 FROM gcr.io/distroless/base
 
-COPY --from=builder /go/src/app/client/ /client/
+COPY --from=builder /go/src/app/public/ /public/
 
 COPY --from=builder /go/src/app/.env /
 

@@ -1,0 +1,12 @@
+{
+  "version": 3,
+  "file": "bundle.css",
+  "sources": [
+    "../../client/node_modules/fa-svelte/src/Icon.svelte"
+  ],
+  "sourcesContent": [
+    "<svg\r\n  aria-hidden=\"true\"\r\n  class=\"{classes}\"\r\n  role=\"img\"\r\n  xmlns=\"http://www.w3.org/2000/svg\"\r\n  viewBox=\"{viewBox}\"\r\n>\r\n  <path fill=\"currentColor\" d=\"{path}\" />\r\n</svg>\r\n<script>\r\n  export let icon;\r\n\r\n  let path = [];\r\n  let classes = \"\";\r\n  let viewBox = \"\";\r\n\r\n  $: viewBox = \"0 0 \" + icon.icon[0] + \" \" + icon.icon[1];\r\n\r\n  $: classes = \"fa-svelte \" + ($$props.class ? $$props.class : \"\");\r\n\r\n  $: path = icon.icon[4];\r\n</script>\r\n\r\n<style>\r\n  .fa-svelte {\r\n    width: 1em;\r\n    height: 1em;\r\n    overflow: visible;\r\n    display: inline-block;\r\n  }\r\n</style>"
+  ],
+  "names": [],
+  "mappings": "AAwBE,UAAU,cAAC,CAAC,AACV,KAAK,CAAE,GAAG,CACV,MAAM,CAAE,GAAG,CACX,QAAQ,CAAE,OAAO,CACjB,OAAO,CAAE,YAAY,AACvB,CAAC"
+}

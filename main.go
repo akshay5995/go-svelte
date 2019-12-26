@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	
+
 	"net/http"
 
 	"log"
@@ -64,10 +64,7 @@ func main() {
 
 	// Custom logger
 	subLog := zerolog.New(os.Stdout).With().
-		Str("foo", "bar").
 		Logger()
-
-	fmt.Printf("Check if we can connect to github")
 
 	_, connectionErr := http.Get("https://api.github.com")
 
@@ -80,6 +77,8 @@ func main() {
 	var githubUser = os.Getenv("GITHUB_USER")
 
 	r := gin.Default()
+
+	r.LoadHTMLGlob("public/templates/*")
 
 	r.Use(logger.SetLogger(logger.Config{
 		Logger: &subLog,
@@ -94,7 +93,27 @@ func main() {
 
 	ctx, github := initGithubClient(githubToken)
 
-	r.Use(static.Serve("/", static.LocalFile("client/public", true)))
+	// Route for JS assets
+	r.Use(static.Serve("/build", static.LocalFile("public/build", true)))
+
+	// Route for Images
+	r.Use(static.Serve("/img", static.LocalFile("public/img", true)))
+
+	// Route for index.html and config object
+	r.GET("/", func(c *gin.Context) {
+		fmt.Printf("/ route called")
+
+		var siteName = os.Getenv("SITE_NAME")
+
+		var devBlogSite = os.Getenv("DEV_BLOG_SITE")
+
+		//render with master
+		c.HTML(http.StatusOK, "index.tmpl", gin.H{
+			"title": siteName,
+			"blog":  devBlogSite,
+			"user":  githubUser,
+		})
+	})
 
 	r.GET("/user", func(c *gin.Context) {
 		user, _, _ := github.Users.Get(ctx, githubUser)

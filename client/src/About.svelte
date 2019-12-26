@@ -1,5 +1,5 @@
 <script>
-  import Card from "./Card.svelte";
+  import Card from "./common/Card.svelte";
   import { onMount } from "svelte";
 
   let name, email, bio, location, image;
@@ -7,7 +7,7 @@
   let loading = true;
 
   async function getUser() {
-    const resp = await fetch("http://localhost:4001/user");
+    const resp = await fetch("/user");
     const data = await resp.json();
 
     name = data.name;
@@ -26,7 +26,7 @@
 
 </style>
 
-<Card title="About">
+<Card heading="About">
   {#if loading}
     <h2 class="font-semibold text-grey-500 cursor-wait">
       <div class="sp sp-bars" />

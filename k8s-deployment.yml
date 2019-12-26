@@ -1,0 +1,49 @@
+---
+apiVersion: apps/v1
+kind: Deployment # Type of Kubernetes resource
+metadata:
+  name: go-svelte # Name of the Kubernetes resource
+spec:
+  replicas: 1 # Number of pods to run at any given time
+  selector:
+    matchLabels:
+      app: go-svelte # This deployment applies to any Pods matching the specified label
+  template: # This deployment will create a set of pods using the configurations in this template
+    metadata:
+      labels: # The labels that will be applied to all of the pods in this deployment
+        app: go-svelte
+    spec: # Spec for the container which will run in the Pod
+      containers:
+        - name: go-svelte
+          image: akshay5995/go-svelte:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 4001 # Should match the port number that the Go application listens on
+          livenessProbe: # To check the health of the Pod
+            httpGet:
+              path: /ping
+              port: 4001
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 15
+            timeoutSeconds: 5
+          readinessProbe: # To check if the Pod is ready to serve traffic or not
+            httpGet:
+              path: /ping
+              port: 4001
+              scheme: HTTP
+            initialDelaySeconds: 5
+            timeoutSeconds: 1
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: go-svelte   # Name of the resource
+spec:
+  type: NodePort                 # A port is opened on each node in your cluster via Kube proxy.
+  ports:                         # Take incoming HTTP requests on port 9090 and forward them to the targetPort of 8080
+  - name: http
+    port: 4001
+    targetPort: 4001
+  selector:
+    app: go-svelte

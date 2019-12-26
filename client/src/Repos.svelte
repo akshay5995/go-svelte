@@ -5,7 +5,7 @@
   import { faCodeBranch } from "@fortawesome/free-solid-svg-icons/faCodeBranch";
   import { faCheckCircle } from "@fortawesome/free-solid-svg-icons/faCheckCircle";
 
-  import Card from "./Card.svelte";
+  import Card from "./common/Card.svelte";
 
   import Icon from "fa-svelte";
 
@@ -18,7 +18,7 @@
   let isLoadedAll = false;
 
   async function getRepos() {
-    const res = await fetch(`http://localhost:4001/repos?count=${count}`);
+    const res = await fetch(`/repos?count=${count}`);
     const { repos, loadedAll } = await res.json();
     repoList = repos;
     isLoadedAll = loadedAll;
@@ -38,7 +38,7 @@
 
 </style>
 
-<Card title="Top repos">
+<Card heading="Top repos">
   <div class="px-5">
     {#if repoList.length}
       <div>
