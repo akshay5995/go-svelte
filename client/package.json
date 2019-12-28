@@ -1,5 +1,5 @@
 {
-  "name": "blog-client",
+  "name": "go-svelte-client",
   "version": "1.0.0",
   "devDependencies": {
     "@fortawesome/free-solid-svg-icons": "^5.11.2",

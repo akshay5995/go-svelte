@@ -1,0 +1,9 @@
+main
+*/node_modules
+*/npm-debug.log
+public/build
+Dockerfile
+.dockerignore
+README.md 
+LICENSE
+wasm/main.wasm
