@@ -2,3 +2,5 @@ main.exe
 .env
 go-svelte
 main
+*/.DS_Store
+.DS_Store
