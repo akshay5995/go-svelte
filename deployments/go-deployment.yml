@@ -19,6 +19,11 @@ spec:
           imagePullPolicy: Always
           ports:
             - containerPort: 4001 # Should match the port number that the Go application listens on
+          env:                     # Environment variables passed to the container
+            - name: REDIS_HOST
+              value: redis-master
+            - name: REDIS_PORT
+              value: "6379"   
           livenessProbe: # To check the health of the Pod
             httpGet:
               path: /ping

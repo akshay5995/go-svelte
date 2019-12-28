@@ -23,7 +23,9 @@ import (
 
 	"github.com/google/go-github/v28/github"
 
-	"fmt"
+	"github.com/go-redis/redis/v7"
+
+	"encoding/json"
 
 	model "go-svelte/models"
 
@@ -35,8 +37,6 @@ import (
 )
 
 func initGithubClient(accessToken string) (context.Context, *github.Client) {
-	fmt.Printf("Initilizing Github Client")
-
 	ctx := context.Background()
 
 	ts := oauth2.StaticTokenSource(
@@ -47,6 +47,18 @@ func initGithubClient(accessToken string) (context.Context, *github.Client) {
 	client := github.NewClient(tc)
 
 	return ctx, client
+}
+
+func createNewRedisClient() *redis.Client {
+	redisHost := os.Getenv("REDIS_HOST")
+
+	client := redis.NewClient(&redis.Options{
+		Addr:     redisHost + ":6379",
+		Password: "", // no password set
+		DB:       0,  // use default DB
+	})
+
+	return client
 }
 
 func main() {
@@ -62,6 +74,14 @@ func main() {
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
 	}
 
+	redisClient := createNewRedisClient()
+
+	_, redisErr := redisClient.Ping().Result()
+
+	if redisErr != nil {
+		log.Fatal("Error connecting to redis")
+	}
+
 	// Custom logger
 	subLog := zerolog.New(os.Stdout).With().
 		Logger()
@@ -72,9 +92,9 @@ func main() {
 		log.Fatal("Error connecting to github")
 	}
 
-	var githubToken = os.Getenv("GITHUB_TOKEN")
+	githubToken := os.Getenv("GITHUB_TOKEN")
 
-	var githubUser = os.Getenv("GITHUB_USER")
+	githubUser := os.Getenv("GITHUB_USER")
 
 	r := gin.Default()
 
@@ -91,7 +111,7 @@ func main() {
 
 	r.Use(cors.New(config))
 
-	ctx, github := initGithubClient(githubToken)
+	ctx, githubClient := initGithubClient(githubToken)
 
 	// Route for JS assets
 	r.Use(static.Serve("/build", static.LocalFile("public/build", true)))
@@ -101,8 +121,6 @@ func main() {
 
 	// Route for index.html and config object
 	r.GET("/", func(c *gin.Context) {
-		fmt.Printf("/ route called")
-
 		var siteName = os.Getenv("SITE_NAME")
 
 		var devBlogSite = os.Getenv("DEV_BLOG_SITE")
@@ -116,13 +134,37 @@ func main() {
 	})
 
 	r.GET("/user", func(c *gin.Context) {
-		user, _, _ := github.Users.Get(ctx, githubUser)
+		key := "user:" + githubUser
+
+		s, redisErr := redisClient.Get(key).Result()
+
+		user := github.User{}
+		err = json.Unmarshal([]byte(s), &user)
+
+		if redisErr != nil {
+			user, _, _ := githubClient.Users.Get(ctx, githubUser)
+			json, err := json.Marshal(user)
+
+			if err != nil {
+				c.JSON(400, gin.H{"error": err.Error()})
+				return
+			}
+
+			redisErr := redisClient.Set(key, json, 0).Err()
+
+			if redisErr != nil {
+				c.JSON(400, gin.H{"error": redisErr.Error()})
+				return
+			}
+
+			c.JSON(200, user)
+		}
 
 		c.JSON(200, user)
 	})
 
 	r.GET("/repos", func(c *gin.Context) {
-		repos, _, _ := github.Repositories.List(ctx, "", nil)
+		repos, _, _ := githubClient.Repositories.List(ctx, "", nil)
 
 		queryCount := c.Request.URL.Query().Get("count")
 
